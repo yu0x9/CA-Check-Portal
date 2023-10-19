@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CA Check Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+     body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #272727;
+      color: #e7e7e7;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 40px;
+      text-shadow: 3px 3px 4px #191919;
+      background-color: #272727;
+      color: #e7e7e7;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background-color: #05ffe6cc;
+      margin: 20px auto;
+      max-width: 1200px; /* 最大幅を指定 */
+    }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      margin-bottom: 20px;
+      margin-left: 8px;
+      margin-right: 8px;
+      border: none;
+      background-color: #272727;
+      color: #05ffe6cc;
+      border-radius: 10px;
+      box-shadow: inset -3px -3px 5px #303030, inset 3px 3px 5px #1f1f1f;
+      outline: none; /* 選択時の青い枠を削除 */
+      transition: box-shadow 0.3s; /* アニメーションの設定 */
+      font-size: 20px; /* 追加: テキストフィールドのフォントサイズを大きくします */
+    }
+
+    input[type="text"]:hover,
+    input[type="text"]:focus {
+      box-shadow: inset -3px -3px 5px #303030, inset 3px 3px 5px #1f1f1f, 0px 0px 10px #05ffe6cc; /* ホバー時とフォーカス時のアニメーション */
+    }
+
+    button#pasteButton,
+      button#uniswapButton,
+      button#dodoexButton {
+        width: auto; /* ボタンの幅を自動調整 */
+        margin: 2px 0; /* ボタン間のマージンを追加 */
+        background-color: #272727;
+        color: #e7e7e7;
+        box-shadow: 10px 10px 20px #1f1f1f, -10px -10px 20px #303030;
+        border: none;
+        border-radius: 10px;
+        font-size: 20px;
+        padding: 18px;
+        margin-bottom: 20px;
+        margin-right: 8px;
+        margin-left: 8px;
+        outline: none;
+        transition: box-shadow 0.3s, transform 0.3s;
+        cursor: pointer;
+      }
+
+      button#pasteButton:hover {
+        box-shadow: -3px -3px 5px #1f1f1f, 3px 3px 5px #303030;
+        transform: translate(0, -2px);
+        color: #05ffe6cc;
+      }
+
+    .button-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      justify-content: center;
+      gap: 11px;
+      margin-bottom: 20px;
+      padding: 0 20px;
+    }
+
+    .button-container button {
+      font-size: 20px;
+      padding: 10px;
+      border: none;
+      background-color: #272727;
+      color: #e7e7e7;
+      border-radius: 10px;
+      box-shadow: -3px -3px 5px #303030, 3px 3px 5px #1f1f1f;
+      outline: none;
+      transition: box-shadow 0.3s, transform 0.3s;
+      width: 100%; /* 追加: ボタンの幅を100%にする */
+      box-sizing: border-box; /* 追加: ボタンのパディングを含めた幅にする */
+    }
+
+    .button-container button:hover,
+    .button-container button:focus {
+      box-shadow: -3px -3px 5px #303030, 3px 3px 5px #1f1f1f, 0px 0px 10px #05ffe6cc; /* ホバー時とフォーカス時のアニメーション */
+      transform: translate(0, -2px); /* ホバー時とフォーカス時の移動アニメーション */
+      color: #05ffe6cc; /* ホバー時とフォーカス時のテキストカラー */
+    }
+
+    .search-history-container {
+      margin-top: 60px;
+      text-align: left;
+    }
+
+    .search-history-container p {
+      color: #b3b3b3;
+    }
+
+    .search-history-container ul {
+      list-style-type: none;
+      padding: 0;
+      color: #b3b3b3;
+    }
+
+    .search-history-container li {
+      margin-bottom: 5px;
+    }
+    
+/* 変更: モバイルデバイス向けのスタイル */
+@media only screen and (max-width: 600px) {
+  .button-container {
+    grid-template-columns: repeat(2, 1fr); /* 2列に調整 */
+    padding: 0;
+    gap: 20px;
+  }
+  /* 追加: input[type="text"] のスタイルを別クラスで指定 */
+  .mobile-input {
+    width: 100%;
+    max-width: 400px;
+    font-size: 20px;
+    padding: 20px;
+    margin: 0px 0 20px 0;
+    border: none;
+    background-color: #272727;
+    color: #05ffe6cc;
+    border-radius: 10px;
+    box-shadow: inset -3px -3px 5px #303030, inset 3px 3px 5px #1f1f1f;
+    outline: none; /* 選択時の青い枠を削除 */
+    transition: box-shadow 0.3s; /* アニメーションの設定 */
+    display: block; /* input[type="text"] のデフォルトスタイルを上書き */
+  }
+}
+  </style>
+</head>
+<body>
+  <h2>CA Check Portal</h2>
+  <hr>
+  <div style="display: flex; align-items: center; justify-content: center;">
+    <input type="text" id="contractAddress" placeholder="ContractAddress" autofocus onpaste="handlePaste(event)">
+    <button id="pasteButton" onclick="pasteFromClipboard()">✍️</button>
+</div>
+  <div class="button-container">
+    <button id="button5" onclick="redirectToMoonarch()">Moonarch</button>
+    <button id="button4" onclick="redirectToHoneypot()">Honeypot</button>
+    <button id="button6" onclick="redirectToDexAnalyzer()">DexAnalyzer</button>
+    <button id="button1" onclick="redirectToTwitterSearch()">Twitter</button>
+    <button id="button22" onclick="redirectToTGScan()">(TGScan)</button>
+    <button id="button2" onclick="redirectToEtherscanC()">Contract</button>
+    <button id="button3" onclick="redirectToEtherscanH()">Holder</button>
+    <button id="button9" onclick="redirectToGoPlus()">GoPlus</button>
+    <button id="button7" onclick="redirectToTokenSniffer()">TokenSniffer</button>
+    <button id="button21" onclick="redirectToBubblemaps()">Bubblemaps</button>
+    
+  </div>
+  <div class="button-container">
+    <button id="button13" onclick="redirectToDexTools()">DexTools</button>
+    <button id="button14" onclick="redirectToAve()">Ave</button>
+    <button id="button18" onclick="redirectTogmgn()">GMGN</button>
+    <button id="button16" onclick="redirectToDexscreener()">Dexscreener</button>
+  </div>
+  <hr>
+  <div class="button-container">
+    <button id="button24" onclick="redirectToDeDotFi()">De.Fi</button>
+    <button id="button8" onclick="redirectToArkham()">Arkham</button>
+    <button id="button23" onclick="redirectToCoinSniper()">(CoinSniper)</button>
+    <button id="button10" onclick="redirectToQuickIntel()">(Quick Intel)</button>
+    <button id="button20" onclick="redirectTododoex()" >dodo</button>
+    <button id="button19" onclick="redirectTouniswap()" >uniswap</button>
+  </div>
+  <!--
+    <button id="button15" onclick="redirectToDexView()">DexView</button>
+    <button id="button11" onclick="redirectToCyberscopeScan()">CsScan</button>
+    <button id="button12" onclick="redirectToCyberscopeSimilarity()">CsSimilarity</button>
+    <button id="button17" onclick="redirectTomoontok()">(Moontok)</button>
+-->
+<div class="search-history-container">
+  <p>history:</p>
+  <ul id="searchHistory"></ul>
+</div>
+
+  <script>
+    function redirectToEtherscanC() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const etherscanURL = `https://etherscan.io/address/${contractAddress}#code`;
+      window.open(etherscanURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToEtherscanH() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const etherscanURL = `https://etherscan.io/token/${contractAddress}#balances`;
+      window.open(etherscanURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToHoneypot() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const honeypotURL = `https://honeypot.is/ethereum?address=${contractAddress}`;
+      window.open(honeypotURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToMoonarch() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const moonarchURL = `https://eth.moonarch.app/token/${contractAddress}`;
+      window.open(moonarchURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToDexAnalyzer() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const dexAnalyzerURL = `https://www.dexanalyzer.io/token/${contractAddress}`;
+      window.open(dexAnalyzerURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToCyberscopeScan() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const cyberscopeScanURL = `https://www.cyberscope.io/cyberscan?network=ETH&address=${contractAddress}`;
+      window.open(cyberscopeScanURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToCyberscopeSimilarity() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const cyberscopeSimilarityURL = `https://www.cyberscope.io/similarityscan?network=ETH&address=${contractAddress}`;
+      window.open(cyberscopeSimilarityURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToDexTools() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const dexToolsURL = `https://www.dextools.io/app/en/ether/pair-explorer/${contractAddress}`;
+      window.open(dexToolsURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToAve() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const aveURL = `https://ave.ai/token/${contractAddress}-eth?from=Token`;
+      window.open(aveURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToDexView() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const dexViewURL = `https://www.dexview.com/eth/${contractAddress}`;
+      window.open(dexViewURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToDexscreener() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const dexscreenerURL = `https://dexscreener.com/ethereum/${contractAddress}`;
+      window.open(dexscreenerURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToTwitterSearch() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const twitterSearchURL = `https://twitter.com/search?q=${contractAddress}`;
+      window.open(twitterSearchURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToTokenSniffer() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const TokenSnifferURL = `https://tokensniffer.com/token/eth/${contractAddress}`;
+      window.open(TokenSnifferURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToGoPlus() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const GoPlusURL = `https://gopluslabs.io/token-security/1/${contractAddress}`;
+      window.open(GoPlusURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToQuickIntel() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const QuickIntelURL = `https://app.quickintel.io/scanner`;
+      window.open(QuickIntelURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectTouniswap() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const uniswapURL = `https://app.uniswap.org/#/swap?outputCurrency=${contractAddress}`;
+      window.open(uniswapURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectTododoex() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const dodoexURL = `https://app.dodoex.io/limit?from=WETH&network=mainnet&to=${contractAddress}`;
+      window.open(dodoexURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectTomoontok() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const moontokURL = `https://moontok.io/`;
+      window.open(moontokURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+      function redirectTogmgn() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const gmgnURL = `https://gmgn.ai/eth/token/${contractAddress}`;
+      window.open(gmgnURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+     function redirectToArkham() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const ArkhamURL = `https://platform.arkhamintelligence.com/visualizer/token/${contractAddress}:ethereum?flow=all&positions=%7B%7D&sortDir=desc&sortKey=value`;
+      window.open(ArkhamURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToBubblemaps() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const BubblemapsURL = `https://app.bubblemaps.io/eth/token/${contractAddress}`;
+      window.open(BubblemapsURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToTGScan() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const TGScanURL = `https://web.telegram.org/a/#-1772592299`;
+      window.open(TGScanURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToCoinSniper() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const CoinSniperURL = `https://coinsniper.net/`;
+      window.open(CoinSniperURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    function redirectToDeDotFi() {
+      const contractAddress = document.getElementById('contractAddress').value;
+      const DeDotFiURL = `https://de.fi/scanner/contract/${contractAddress}`;
+      window.open(DeDotFiURL, '_blank');
+      addToSearchHistory(contractAddress);
+    }
+
+    // input要素の値が変更されたときの処理
+  function handleInputChange(event) {
+    const pastedText = event.target.value;
+    document.getElementById('contractAddress').value = pastedText;
+  }
+
+    function pasteFromClipboard() {
+      navigator.clipboard.readText().then((text) => {
+        document.getElementById('contractAddress').value = text;
+      }).catch((error) => {
+        console.error('Failed to read clipboard content: ', error);
+      });
+    }
+
+     // ペースト時の処理
+     function handlePaste(event) {
+      event.preventDefault();
+      const text = (event.clipboardData || window.clipboardData).getData('text');
+      document.getElementById('contractAddress').value = text;
+    }
+
+    // 入力フィールドの値が変更されたときの処理
+    document.getElementById('contractAddress').addEventListener('input', handleInputChange);
+
+    function handleInputChange(event) {
+      const pastedText = event.target.value;
+      document.getElementById('contractAddress').value = pastedText;
+    }
+
+    function addToSearchHistory(contractAddress) {
+      const searchHistory = document.getElementById('searchHistory');
+      const existingItems = searchHistory.getElementsByTagName('li');
+
+      // 重複チェック
+      for (let i = 0; i < existingItems.length; i++) {
+        if (existingItems[i].textContent === contractAddress) {
+          // 既に検索履歴に存在する場合は追加せずに終了
+          return;
+        }
+      }
+
+      const listItem = document.createElement('li');
+      listItem.textContent = contractAddress;
+      searchHistory.prepend(listItem);
+      if (searchHistory.children.length > 20) {
+        searchHistory.lastChild.remove();
+      }
+    }
+
+
+// Etherscan APIキー
+const etherscanApiKey = 'APIキー';
+
+
+// トークンアドレスからシンボルを取得する関数
+async function getTokenSymbol(tokenAddress) {
+  try {
+    const response = await fetch(`https://api.etherscan.io/api?module=token&action=gettokeninfo&contractaddress=${tokenAddress}&apikey=${etherscanApiKey}`);
+    const data = await response.json();
+
+    if (data.status === '1' && data.result && data.result.symbol) {
+      return data.result.symbol;
+    } else {
+      return 'N/A'; // シンボルが見つからない場合のデフォルト値
+    }
+  } catch (error) {
+    console.error('Error fetching token symbol:', error);
+    return 'N/A'; // エラーが発生した場合のデフォルト値
+  }
+}
+
+// サーチヒストリーにトークンシンボルを追加する関数
+function addToSearchHistoryWithSymbol(contractAddress) {
+  getTokenSymbol(contractAddress)
+    .then(symbol => {
+      const searchHistory = document.getElementById('searchHistory');
+      const existingItems = searchHistory.getElementsByTagName('li');
+
+      // 重複チェック
+      let isDuplicate = false; // 重複フラグを追加
+
+      for (let i = 0; i < existingItems.length; i++) {
+        if (existingItems[i].textContent === `${contractAddress} (${symbol})`) {
+          // 既に検索履歴に存在する場合は重複フラグを立てる
+          isDuplicate = true;
+          break; // 重複が見つかったらループを終了
+        }
+      }
+      if (!isDuplicate) { // 重複がない場合のみ追加
+        const listItem = document.createElement('li');
+        listItem.textContent = `${contractAddress} (${symbol})`; // トークンシンボルを追加
+        searchHistory.prepend(listItem);
+        if (searchHistory.children.length > 20) {
+          searchHistory.lastChild.remove();
+        }
+      }
+    });
+}
+
+// トークンアドレスをユーザーが入力したら、この関数を呼び出す
+function searchToken() {
+  const contractAddress = document.getElementById('contractAddress').value;
+  addToSearchHistoryWithSymbol(contractAddress);
+  // 他のトークン情報を取得する処理をここに追加する
+}
+
+
+    
+  </script>
+</body>
+</html>
